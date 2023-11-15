@@ -31,5 +31,38 @@ function getMinPrice (array $array) {
 }
 
 
+function categoryFilter(int $categorySearch) 
+{
+    $pdo = connectDB(); 
+    $statement=$pdo->prepare("SELECT catc.idconcert FROM donkeyconcert.category_concert catc LEFT JOIN donkeyconcert.category cat ON catc.idcategory = cat.idcategory WHERE catc.idcategory = :categorySearch");
+    $statement->bindValue(':categorySearch', $categorySearch, PDO::PARAM_INT);
+    $statement->execute();
+    $array = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
+function categoryAndDateFilter(string $dateStart, string $dateEnd, string $categorySearch) {
+    $pdo = connectDB(); 
+    $statement=$pdo->prepare("SELECT cd.* FROM donkeyconcert.concert_date cd
+    LEFT JOIN donkeyconcert.category_concert cat ON cd.idconcert = cat.idconcert 
+    WHERE cd.dateConcert BETWEEN :dateStart AND :dateEnd AND cat.idcategory = :categorySearch");
+    $statement->bindValue(':dateStart', $dateStart, PDO::PARAM_STR);
+    $statement->bindValue(':dateEnd', $dateEnd, PDO::PARAM_STR);
+    $statement->bindValue(':categorySearch', $categorySearch, PDO::PARAM_STR);
+    $statement->execute();
+    $array = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
+function dateFilter(string $dateStart, string $dateEnd) {
+    $pdo = connectDB(); 
+    $statement=$pdo->prepare("SELECT cd.* FROM donkeyconcert.concert_date cd
+    WHERE cd.dateConcert BETWEEN :dateStart AND :dateEnd");
+    $statement->bindValue(':dateStart', $dateStart, PDO::PARAM_STR);
+    $statement->bindValue(':dateEnd', $dateEnd, PDO::PARAM_STR);
+    $statement->execute();
+    $array = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
 
 ?>
