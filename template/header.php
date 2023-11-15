@@ -9,4 +9,6 @@
     <link href="../style.css" rel="stylesheet">
   </head>
   <body>
-  <?php include "template/navBar.php" ?>
+  <?php include "template/navBar.php";
+        include "./function.php";
+  ?>
