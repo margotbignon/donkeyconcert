@@ -65,4 +65,42 @@ function dateFilter(string $dateStart, string $dateEnd) {
     return $array;
 }
 
+function getOneConcert(string $table, string $id, int $idGet) {
+    $pdo = connectDB();
+    $statement=$pdo->prepare("SELECT $table.* FROM $table WHERE $id=:getId");
+    $statement->bindValue(':getId', $idGet, PDO::PARAM_INT);
+    $statement->execute();
+    $array=$statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
+function getOneConcertJoin(string $id, string $idGet) {
+    $pdo = connectDB();
+    $sql = <<<SQL
+    SELECT c.idconcert, 
+    c.img_concert, c.name as concert,
+    c.description, 
+    a.name as artist, 
+    DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR, 
+    DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR, 
+    DATE_FORMAT(MIN(cd.dateConcert), '%Y-%m-%d') as dateMinFRInput, 
+    DATE_FORMAT(MAX(cd.dateConcert), '%Y-%m-%d') as dateMaxFRInput 
+    FROM 
+        donkeyconcert.concert c 
+    LEFT JOIN 
+        donkeyconcert.artist a ON c.idartist = a.idartist 
+    LEFT JOIN 
+        donkeyconcert.concert_date cd ON c.idconcert = cd.idconcert 
+    GROUP BY 
+        c.idconcert
+    HAVING 
+        $id = :idGet
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':idGet', $idGet, PDO::PARAM_INT);
+    $statement->execute();
+    $array = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
 ?>

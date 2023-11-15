@@ -14,9 +14,12 @@
         }
         if (!empty($_POST['dateStart']) && !empty($_POST['dateEnd']) && empty($_POST['category'])) {
             $selectFilters = dateFilter($dateStart, $dateEnd);
+           
+            
         }
         if (!empty($_POST['category']) && !empty($_POST['dateStart']) && !empty($_POST['dateEnd'])) {
             $selectFilters = categoryAndDateFilter($dateStart, $dateEnd, $categorySearch);
+            
         }
         if (!isset($selectFilters)) {
             $filterNotFund = true;
@@ -31,6 +34,7 @@
         $statement = $pdo->query($query);
         $concerts = $statement->fetchAll(PDO::FETCH_ASSOC);
     }
+
 ?>
 
 <img class="img-header" src="img/concertimg2.jpg">
@@ -69,12 +73,12 @@ endif;?>
                 <p><?= $concert['concert'] ?></p>
                 <p>Du <?= $concert['dateMinFR'] ?> Au <?= $concert['dateMaxFR'] ?></p> 
             </div>
-                    <div class="col-md-4 d-flex flex-column align-items-center mt-5">
-                        <p class="offset-md-6">
+                    <div class="col-md-4 d-flex flex-column align-items-center mt-5 text-center">
+                        <p class="offset-md-6 text-center">
                             <?php $price = getPrices($concert['idconcert']);?>
                             A partir de <?= getMinPrice($price)?> €
                         </p>
-                        <button type="button" class="btn btn-primary btn-lg offset-md-6">Je réserve !</button>
+                        <a href="detailBooking.php?idconcert=<?= $concert['idconcert'] ?>"><button type="button" class="btn btn-primary btn-lg offset-md-6" style="width:150%" >Je réserve</button></a>
                     </div>    
                 </div>
                 <hr class="border border-danger border-2 opacity-50 w-75 mx-auto mt-5">
