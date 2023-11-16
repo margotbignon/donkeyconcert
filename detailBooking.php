@@ -7,7 +7,6 @@
     if (!empty($_POST)) {
         $dateSelection = $_POST['dateSelection'];
         $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);
-        var_dump($categoriesPlacement);
     }
 ?>
 <h2 class="text-center mt-5">Voyez <?= $concert[0]['artist']?> en concert !</h2>
@@ -40,7 +39,7 @@
         <p class="text-center">Choisissez vos billets</p>
         <?php foreach ($categoriesPlacement as $categoryPlacement) : ?>
             <div class="mb-1">
-                <?= $categoryPlacement['namePlace'] ?> <input  class="bg-secondary text-center border rounded ms-n2" type="number" value="0">
+                <?= $categoryPlacement['namePlace'] ?> <input  class="bg-secondary text-center border rounded ms-n2" type="number" max="<?=$categoryPlacement['capacity_available']?>" value="0">
                 <?= $categoryPlacement['price'] ?>€/place
             </div>
         <?php endforeach; ?>
@@ -55,5 +54,7 @@
         </label>
         <?php endforeach ;?>
 </div>
-
+<div class="text-center mt-5">
+    <button type="button" class="btn btn-info mx-auto">J'ajoute au panier</button>
+</div>
 

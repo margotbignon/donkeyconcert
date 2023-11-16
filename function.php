@@ -176,7 +176,7 @@ function getCategoriesPlacementWhereConcert(string $id, string $idGet, string $d
         donkeyconcert.place p ON cpd.idplace = p.idplace
     LEFT JOIN 
         donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
-    WHERE $id = :idGet AND dateConcert = :dateSelection
+    WHERE $id = :idGet AND dateConcert = :dateSelection AND cpd.capacity_available > 0
     SQL;
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':idGet', $idGet, PDO::PARAM_INT);
