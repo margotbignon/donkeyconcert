@@ -167,6 +167,7 @@ function getCategoriesPlacementWhereConcert(string $id, string $idGet, string $d
     $pdo = connectDB();
     $sql=<<<SQL
     SELECT 
+        p.idplace,
         p.namePlace,
         cpd.price,
         cpd.capacity_available
