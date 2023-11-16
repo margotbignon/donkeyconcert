@@ -33,8 +33,29 @@ function getMinPrice (array $array) {
 
 function categoryFilter(int $categorySearch) 
 {
-    $pdo = connectDB(); 
-    $statement=$pdo->prepare("SELECT catc.idconcert FROM donkeyconcert.category_concert catc LEFT JOIN donkeyconcert.category cat ON catc.idcategory = cat.idcategory WHERE catc.idcategory = :categorySearch");
+    $pdo = connectDB();
+    $sql=<<<SQL
+    SELECT 
+        catc.idconcert, 
+        c.name as concert, 
+        c.img_concert, 
+        a.name as artist,
+        DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR, 
+        DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR 
+    FROM 
+        donkeyconcert.category_concert catc
+    LEFT JOIN 
+        donkeyconcert.concert c ON catc.idconcert = c.idconcert
+    LEFT JOIN 
+        donkeyconcert.artist a ON c.idartist = a.idartist
+    LEFT JOIN 
+        donkeyconcert.concert_date cd ON catc.idconcert = cd.idconcert
+    WHERE 
+        catc.idcategory = :categorySearch 
+    GROUP BY 
+        catc.idconcert 
+SQL; 
+    $statement=$pdo->prepare($sql);
     $statement->bindValue(':categorySearch', $categorySearch, PDO::PARAM_INT);
     $statement->execute();
     $array = $statement->fetchAll(PDO::FETCH_ASSOC);
@@ -42,10 +63,30 @@ function categoryFilter(int $categorySearch)
 }
 
 function categoryAndDateFilter(string $dateStart, string $dateEnd, string $categorySearch) {
-    $pdo = connectDB(); 
-    $statement=$pdo->prepare("SELECT cd.* FROM donkeyconcert.concert_date cd
-    LEFT JOIN donkeyconcert.category_concert cat ON cd.idconcert = cat.idconcert 
-    WHERE cd.dateConcert BETWEEN :dateStart AND :dateEnd AND cat.idcategory = :categorySearch");
+    $pdo = connectDB();
+    $sql=<<<SQL
+    SELECT 
+        catc.idconcert, 
+        c.name as concert, 
+        c.img_concert, 
+        a.name as artist,
+        DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR, 
+        DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR 
+    FROM 
+        donkeyconcert.category_concert catc
+    LEFT JOIN 
+        donkeyconcert.concert c ON catc.idconcert = c.idconcert
+    LEFT JOIN 
+        donkeyconcert.artist a ON c.idartist = a.idartist
+    LEFT JOIN 
+        donkeyconcert.concert_date cd ON catc.idconcert = cd.idconcert
+    WHERE 
+        cd.dateConcert BETWEEN :dateStart AND :dateEnd AND catc.idcategory = :categorySearch
+    GROUP BY 
+        catc.idconcert
+SQL; 
+
+    $statement=$pdo->prepare($sql);
     $statement->bindValue(':dateStart', $dateStart, PDO::PARAM_STR);
     $statement->bindValue(':dateEnd', $dateEnd, PDO::PARAM_STR);
     $statement->bindValue(':categorySearch', $categorySearch, PDO::PARAM_STR);
@@ -55,9 +96,28 @@ function categoryAndDateFilter(string $dateStart, string $dateEnd, string $categ
 }
 
 function dateFilter(string $dateStart, string $dateEnd) {
-    $pdo = connectDB(); 
-    $statement=$pdo->prepare("SELECT cd.* FROM donkeyconcert.concert_date cd
-    WHERE cd.dateConcert BETWEEN :dateStart AND :dateEnd");
+    $pdo = connectDB();
+    $sql =<<<SQL
+    SELECT 
+        cd.idconcert,
+        c.name as concert, 
+        c.img_concert, 
+        a.name as artist, 
+        DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR, 
+        DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR 
+    FROM 
+        donkeyconcert.concert_date cd
+    LEFT JOIN 
+        donkeyconcert.concert c ON cd.idconcert = c.idconcert
+    LEFT JOIN 
+        donkeyconcert.artist a ON c.idartist = a.idartist
+    WHERE 
+        cd.dateConcert BETWEEN :dateStart AND :dateEnd
+    GROUP BY 
+        cd.idconcert
+SQL;
+
+    $statement=$pdo->prepare($sql);
     $statement->bindValue(':dateStart', $dateStart, PDO::PARAM_STR);
     $statement->bindValue(':dateEnd', $dateEnd, PDO::PARAM_STR);
     $statement->execute();
@@ -102,5 +162,30 @@ SQL;
     $array = $statement->fetchAll(PDO::FETCH_ASSOC);
     return $array;
 }
+
+function getCategoriesPlacementWhereConcert(string $id, string $idGet, string $dateSelection) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    SELECT 
+        p.namePlace,
+        cpd.price,
+        cpd.capacity_available
+    FROM 
+        donkeyconcert.concert_place_date cpd
+    LEFT JOIN 
+        donkeyconcert.place p ON cpd.idplace = p.idplace
+    LEFT JOIN 
+        donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
+    WHERE $id = :idGet AND dateConcert = :dateSelection
+    SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':idGet', $idGet, PDO::PARAM_INT);
+    $statement->bindValue(':dateSelection', $dateSelection, PDO::PARAM_STR);
+    $statement->execute();
+    $array = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
+
 
 ?>

@@ -10,24 +10,18 @@
         $dateStart = $_POST['dateStart'];
         $dateEnd = $_POST['dateEnd'];
         if (!empty($_POST['category']) && empty($_POST['dateStart']) && empty($_POST['dateEnd'])) {
-            $selectFilters = categoryFilter($categorySearch);
+            $concerts = categoryFilter($categorySearch);
         }
         if (!empty($_POST['dateStart']) && !empty($_POST['dateEnd']) && empty($_POST['category'])) {
-            $selectFilters = dateFilter($dateStart, $dateEnd);
+            $concerts = dateFilter($dateStart, $dateEnd);
            
-            
         }
         if (!empty($_POST['category']) && !empty($_POST['dateStart']) && !empty($_POST['dateEnd'])) {
-            $selectFilters = categoryAndDateFilter($dateStart, $dateEnd, $categorySearch);
+            $concerts = categoryAndDateFilter($dateStart, $dateEnd, $categorySearch);
             
         }
-        if (!isset($selectFilters)) {
+        if (!isset($concerts)) {
             $filterNotFund = true;
-        } else {
-            foreach ($selectFilters as $selectFilter) {
-                $statement=$pdo->query("SELECT c.idconcert, c.img_concert, c.name as concert, a.name as artist, DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR , DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR FROM donkeyconcert.concert c LEFT JOIN donkeyconcert.artist a ON c.idartist = a.idartist LEFT JOIN donkeyconcert.concert_date cd ON c.idconcert = cd.idconcert GROUP BY c.idconcert HAVING c.idconcert = $selectFilter[idconcert]");
-                $concerts = $statement->fetchAll(PDO::FETCH_ASSOC);
-            }
         }
     } else {
         $query="SELECT c.idconcert, c.img_concert, c.name as concert, a.name as artist, DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR , DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR FROM donkeyconcert.concert c LEFT JOIN donkeyconcert.artist a ON c.idartist = a.idartist LEFT JOIN donkeyconcert.concert_date cd ON c.idconcert = cd.idconcert GROUP BY c.idconcert";
