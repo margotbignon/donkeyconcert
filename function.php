@@ -211,6 +211,17 @@ SQL;
     $statement->execute();
 }
 
-
+function deleteRow(string $table, string $idDB, int $idGet) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    DELETE FROM
+        $table
+    WHERE 
+        $idDB = :idGET    
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':idGet', $idGet, PDO::PARAM_INT);
+    $statement->execute();
+}
 
 ?>
