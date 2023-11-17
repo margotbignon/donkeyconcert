@@ -187,6 +187,30 @@ function getCategoriesPlacementWhereConcert(string $id, string $idGet, string $d
     return $array;
 }
 
+function InsertCart($iduser, $dateSelection, $categoryPlacement, $idconcert, $nbTickets, $options, $priceTotal) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    INSERT INTO 
+        donkeyconcert.cart (iduser, idconcert_place_date, nb_tickets, idoption, priceTotal) 
+        VALUES 
+        (:iduser, 
+            (SELECT cpd.idconcert_place_date 
+            FROM donkeyconcert.concert_place_date cpd
+            LEFT JOIN donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
+            WHERE cd.dateConcert = STR_TO_DATE(:dateSelection, '%Y-%m-%d') AND cpd.idplace = :categoryPlacement AND cd.idconcert = :idconcert),
+        :nbTickets, :options, :priceTotal);
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
+    $statement->bindValue(':dateSelection', $dateSelection, PDO::PARAM_STR);
+    $statement->bindValue(':categoryPlacement', $categoryPlacement, PDO::PARAM_STR);
+    $statement->bindValue(':idconcert', $idconcert, PDO::PARAM_STR);
+    $statement->bindValue(':nbTickets', $nbTickets, PDO::PARAM_STR);
+    $statement->bindValue(':options', $options, PDO::PARAM_STR);
+    $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
+    $statement->execute();
+}
+
 
 
 ?>

@@ -3,30 +3,31 @@
    
     $idconcert = $_GET['idconcert'];
     $concert = getOneConcertJoin('idconcert', $idconcert);
-    $options = getTable('donkeyconcert.options');
+    $optionsDB = getTable('donkeyconcert.options');
+    $iduser = 1;
     if (!empty($_POST)) {
         $dateSelection = $_POST['dateSelection'];
         $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);
-        var_dump($_POST);
-        var_dump($categoriesPlacement);
-        $prixtotal=0;
+        $priceTotal=0;
         if (!empty($_POST['addcart'])) {
             $categoriesAdd = $_POST['categoryPlacement'];
             
             foreach ($categoriesAdd as $id => $category){
-                foreach ($categoriesPlacement as $categoryPlacement) {
-                    if ($id == $categoryPlacement['idplace']) {
-                        if (!empty($_POST['option-insurance']) && $_POST['option-insurance'] == 'on') {
-                            $prixtotal = $options[0]['price'] + ($category * $categoryPlacement['price']);
-                    } else {
-                        $prixtotal = $category * $categoryPlacement['price'];
+                if ($category > 0) {
+                    foreach ($categoriesPlacement as $categoryPlacement) {
+                        if ($id == $categoryPlacement['idplace'] && $category > 0) {
+                            if (!empty($_POST['option-insurance']) && $_POST['option-insurance'] == 'on') {
+                                $priceTotal = $optionsDB[0]['price'] + ($category * $categoryPlacement['price']);
+                                $options = 1;
+                            } else {
+                                $priceTotal = $category * $categoryPlacement['price'];
+                                $options = NULL;
+                            }
+                        } 
                     }
-                } 
+                    InsertCart($iduser, $dateSelection, $id, $idconcert, $category, $options, $priceTotal);
                 }
-                    echo "Prix total : " .$prixtotal. "<br/>";
-            }
-            
-            
+            }    
         }
     }
     
@@ -72,10 +73,10 @@
         <?php endif; ?>
     </div>
     <div class="mt-5 ms-5 container">
-            <?php foreach ($options as $option) : ?>
+            <?php foreach ($optionsDB as $optionDB) : ?>
             <input class="form-check-input" type="checkbox" name="option-insurance" id="flexCheckChecked">
             <label class="form-check-label" for="flexCheckChecked">
-            Je prends l'<?= $option['name'] ?> à <?= $option['price'] ?>€
+            Je prends l'<?= $optionDB['name'] ?> à <?= $optionDB['price'] ?>€
             </label>
             <?php endforeach ;?>
     </div>
