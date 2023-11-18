@@ -7,7 +7,7 @@
     $idconcert = $_GET['idconcert'];
     $concert = getOneConcertJoin('idconcert', $idconcert);
     $optionsDB = getTable('donkeyconcert.options');
-    $iduser = 1;
+    $iduser = $_SESSION['iduser'];
      if (!empty($_POST)) {
          $dateSelection = $_POST['dateSelection'];
          $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);

@@ -26,7 +26,7 @@
             <button class="btn btn-secondary my-2 my-sm-0" type="submit">Rechercher</button>
         </form>
         </div>
-        <div class="p-2 d-flex mt-3">
+        <div class="p-2 d-flex mt-1">
             <a href="cart.php"><i class="fa-solid fa-cart-shopping fa-2xl iconsnav" style="color: #ffffff;"></i></a>
             <a href="my-account.php"><i class="fa-solid fa-user fa-2xl" style="color: #ffffff;"></i></a>
             <?php if (!empty($_SESSION['iduser'])) :?>

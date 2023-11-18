@@ -4,7 +4,7 @@
         header ('Location:login.php');
     }
     $pdo = connectDB();
-    $iduser = 1;
+    $iduser = $_SESSION['iduser'];
     $sql =<<<SQL
     SELECT 
       ca.*, cd.dateConcert, cd.hourConcert, c.name as concert, a.name as artist, p.namePlace, o.name as optionName
@@ -76,4 +76,8 @@ SQL;
     <h4 class="card-title">Prix total</h4>
     <p class="card-text"><?= $priceTotal ?> €</p>
   </div>
+</div>
+<div class="text-center">
+  <button type="button" class="btn btn-info mx-auto text-center">Valider</button>
+</div>
 
