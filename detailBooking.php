@@ -1,35 +1,36 @@
 <?php 
     include "template/header.php";
-   
+    if (empty($_SESSION)) {
+        header ('Location:login.php');
+        die;
+    }
     $idconcert = $_GET['idconcert'];
     $concert = getOneConcertJoin('idconcert', $idconcert);
     $optionsDB = getTable('donkeyconcert.options');
     $iduser = 1;
-    if (!empty($_POST)) {
-        $dateSelection = $_POST['dateSelection'];
-        $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);
-        $priceTotal=0;
-        if (!empty($_POST['addcart'])) {
-            $categoriesAdd = $_POST['categoryPlacement'];
-            
-            foreach ($categoriesAdd as $id => $category){
-                if ($category > 0) {
-                    foreach ($categoriesPlacement as $categoryPlacement) {
-                        if ($id == $categoryPlacement['idplace'] && $category > 0) {
-                            if (!empty($_POST['option-insurance']) && $_POST['option-insurance'] == 'on') {
-                                $priceTotal = $optionsDB[0]['price'] + ($category * $categoryPlacement['price']);
-                                $options = 1;
-                            } else {
-                                $priceTotal = $category * $categoryPlacement['price'];
-                                $options = NULL;
-                            }
-                        } 
+     if (!empty($_POST)) {
+         $dateSelection = $_POST['dateSelection'];
+         $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);
+         $priceTotal=0;
+         if (!empty($_POST['addcart'])) {
+             $categoriesAdd = $_POST['categoryPlacement'];
+             foreach ($categoriesAdd as $id => $category){
+                 if ($category > 0) {
+                     foreach ($categoriesPlacement as $categoryPlacement) {
+                         if ($id == $categoryPlacement['idplace'] && $category > 0) {
+                                 $priceTotal = $category * $categoryPlacement['price'];
+                             }
+                         } 
+                     
+                     InsertCartWithoutOptions($iduser, $dateSelection, $id, $idconcert, $category, $priceTotal);
+                     header('Location:cart.php');
                     }
-                    InsertCart($iduser, $dateSelection, $id, $idconcert, $category, $options, $priceTotal);
+                 }
+                 if (!empty($_POST['option-insurance']) && $_POST['option-insurance'] == 'on') {
+                    insertOptions($iduser, 1, $dateSelection, $idconcert, 25);
                 }
-            }    
-        }
-    }
+             }    
+         }
     
 ?>
 <h2 class="text-center mt-5">Voyez <?= $concert[0]['artist']?> en concert !</h2>

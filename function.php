@@ -187,18 +187,18 @@ function getCategoriesPlacementWhereConcert(string $id, string $idGet, string $d
     return $array;
 }
 
-function InsertCart($iduser, $dateSelection, $categoryPlacement, $idconcert, $nbTickets, $options, $priceTotal) {
+function InsertCartWithoutOptions($iduser, $dateSelection, $categoryPlacement, $idconcert, $nbTickets, $priceTotal) {
     $pdo = connectDB();
     $sql=<<<SQL
     INSERT INTO 
-        donkeyconcert.cart (iduser, idconcert_place_date, nb_tickets, idoption, priceTotal) 
+        donkeyconcert.cart (iduser, idconcert_place_date, nb_tickets, idoption, idconcert_date, priceTotal) 
         VALUES 
         (:iduser, 
             (SELECT cpd.idconcert_place_date 
             FROM donkeyconcert.concert_place_date cpd
             LEFT JOIN donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
             WHERE cd.dateConcert = STR_TO_DATE(:dateSelection, '%Y-%m-%d') AND cpd.idplace = :categoryPlacement AND cd.idconcert = :idconcert),
-        :nbTickets, :options, :priceTotal);
+        :nbTickets, NULL, NULL, :priceTotal);
 SQL;
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
@@ -206,7 +206,27 @@ SQL;
     $statement->bindValue(':categoryPlacement', $categoryPlacement, PDO::PARAM_STR);
     $statement->bindValue(':idconcert', $idconcert, PDO::PARAM_STR);
     $statement->bindValue(':nbTickets', $nbTickets, PDO::PARAM_STR);
+    $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
+    $statement->execute();
+}
+
+function insertOptions($iduser, $options, $dateSelection, $idconcert, $priceTotal) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    INSERT INTO
+        donkeyconcert.cart (iduser, idconcert_place_date, nb_tickets, idoption, idconcert_date, priceTotal) 
+    VALUES 
+        (:iduser, NULL, NULL, :options, 
+        (SELECT cd.idconcert_date
+        FROM donkeyconcert.concert_date cd
+        WHERE cd.dateConcert = STR_TO_DATE(:dateSelection, '%Y-%m-%d') AND cd.idconcert = :idconcert), 
+        :priceTotal);
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
     $statement->bindValue(':options', $options, PDO::PARAM_STR);
+    $statement->bindValue(':dateSelection', $dateSelection, PDO::PARAM_STR);
+    $statement->bindValue(':idconcert', $idconcert, PDO::PARAM_INT);
     $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
     $statement->execute();
 }
@@ -217,7 +237,7 @@ function deleteRow(string $table, string $idDB, int $idGet) {
     DELETE FROM
         $table
     WHERE 
-        $idDB = :idGET    
+        $idDB = :idGet    
 SQL;
     $statement = $pdo->prepare($sql);
     $statement->bindValue(':idGet', $idGet, PDO::PARAM_INT);

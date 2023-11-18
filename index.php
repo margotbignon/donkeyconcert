@@ -70,7 +70,7 @@ endif;?>
                     <div class="col-md-4 d-flex flex-column align-items-center mt-5 text-center">
                         <p class="offset-md-6 text-center">
                             <?php $price = getPrices($concert['idconcert']);?>
-                            A partir de <?= getMinPrice($price)?> €
+                            A partir de <?= getMinPrice($price)?>€
                         </p>
                         <a href="detailBooking.php?idconcert=<?= $concert['idconcert'] ?>"><button type="button" class="btn btn-primary btn-lg offset-md-6" style="width:150%" >Je réserve</button></a>
                     </div>    

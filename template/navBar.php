@@ -1,3 +1,8 @@
+<?php
+    session_start();
+?>
+
+
 <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
   <div class="container-fluid d-flex  justify-content-between">
         <div class="p-2 d-flex ">
@@ -21,9 +26,12 @@
             <button class="btn btn-secondary my-2 my-sm-0" type="submit">Rechercher</button>
         </form>
         </div>
-        <div class="p-2 d-flex">
-            <i class="fa-solid fa-cart-shopping fa-2xl iconsnav" style="color: #ffffff;"></i>
-            <i class="fa-solid fa-user fa-2xl" style="color: #ffffff;"></i>
+        <div class="p-2 d-flex mt-3">
+            <a href="cart.php"><i class="fa-solid fa-cart-shopping fa-2xl iconsnav" style="color: #ffffff;"></i></a>
+            <a href="my-account.php"><i class="fa-solid fa-user fa-2xl" style="color: #ffffff;"></i></a>
+            <?php if (!empty($_SESSION['iduser'])) :?>
+                <a href="deletesession.php" class="ms-2 mt-n1">Se déconnecter</a>
+            <?php ; endif;?>
         </div>
     </div>
 </nav>

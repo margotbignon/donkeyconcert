@@ -1,10 +1,13 @@
 <?php 
     include "template/header.php";
+    if (empty($_SESSION)) {
+        header ('Location:login.php');
+    }
     $pdo = connectDB();
     $iduser = 1;
     $sql =<<<SQL
     SELECT 
-      ca.*, cd.dateConcert, cd.hourConcert, c.name as concert, a.name as artist, p.namePlace
+      ca.*, cd.dateConcert, cd.hourConcert, c.name as concert, a.name as artist, p.namePlace, o.name as optionName
     FROM
       donkeyconcert.cart ca 
     LEFT JOIN 
@@ -17,18 +20,22 @@
       donkeyconcert.artist a ON c.idartist = a.idartist
     LEFT JOIN
       donkeyconcert.place p ON cpd.idplace = p.idplace
+    LEFT JOIN
+      donkeyconcert.options o ON ca.idoption = o.idoption
     WHERE iduser = :iduser;
 SQL;
   $statement=$pdo->prepare($sql);
   $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
   $statement->execute();
   $cartBookings = $statement->fetchAll(PDO::FETCH_ASSOC);
-  var_dump($cartBookings);
   $priceTotal = 0;
 
 ?>
 
 <h1>Mon panier</h1>
+<?php if (empty($cartBookings)) :?>
+  <p class="text-center mt-5">Votre panier est vide</p>
+<?php ; die; endif ;?>
 <table class="table table-hover container text-center">
   <thead>
     <tr>
@@ -48,10 +55,15 @@ SQL;
         <td scope="row"><?=$cartBooking['concert']?></td>
         <td><?=$cartBooking['artist']?></td>
         <td><?=$cartBooking['dateConcert']?> <?=$cartBooking['hourConcert']?></td>
-        <td><?=$cartBooking['namePlace']?></td>
-        <td><?=$cartBooking['nb_tickets']?></td>
-        <td><?=$cartBooking['priceTotal']?></td>
-        <td>Modifier<br/><a href="delete.php?idcart=<?=$cartBooking['idcarte']?>&ref=cart&iduser=<?=$iduser?>">Supprimer</td>
+        <?php if (empty($cartBooking['idconcert_place_date'])) { ?>
+          <td>Options</td>
+          <td><?=$cartBooking['optionName']?></td>
+        <?php ;} else {?>
+          <td><?=$cartBooking['namePlace']?></td>
+          <td><?=$cartBooking['nb_tickets']?></td>
+        <?php ; }; ?>
+        <td><?=$cartBooking['priceTotal']?> €</td>
+        <td>Modifier<br/><a href="delete.php?idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>">Supprimer</td>
         
       </tr>
         <?php 

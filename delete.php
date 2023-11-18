@@ -1,8 +1,9 @@
 <?php 
     include "function.php"; 
-    $pdo = $connectDB();
+    $pdo = connectDB();
     $idCart = $_GET['idcart'];
     if ($_GET['ref'] == 'cart') {
-        deleteRow('donkeyconcert.cart', 'idcarte', $idCart);
+        deleteRow('donkeyconcert.cart', 'idcart', $idCart);
+        header('Location:cart.php');
     }
 
