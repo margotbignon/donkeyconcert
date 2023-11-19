@@ -296,4 +296,31 @@ SQL;
     $statement->execute();
 }
 
+function getRowForDate ($parameter, int $iduser) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    SELECT 
+        cpd.idconcert_place_date, c.name as concert, a.name as artist, cd.dateConcert, cd.hourConcert, p.namePlace, bc.priceTotal, bc.nb_tickets, c.img_concert, bc.idbooking_concert 
+    FROM 
+        donkeyconcert.booking_concert bc
+    LEFT JOIN 
+        donkeyconcert.concert_place_date cpd ON bc.idconcert_place_date = cpd.idconcert_place_date
+    LEFT JOIN 
+        donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
+    LEFT JOIN 
+        donkeyconcert.place p ON cpd.idplace = p.idplace
+    LEFT JOIN 
+        donkeyconcert.concert c ON cd.idconcert = c.idconcert
+    LEFT JOIN 
+        donkeyconcert.artist a ON c.idartist = a.idartist
+    WHERE 
+        iduser = :iduser AND cd.dateConcert $parameter NOW()
+SQL;
+    $statement=$pdo->prepare($sql);
+    $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
+    $statement->execute();
+    $array=$statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
 ?>
