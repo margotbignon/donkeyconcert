@@ -29,6 +29,34 @@ SQL;
   $statement->execute();
   $cartBookings = $statement->fetchAll(PDO::FETCH_ASSOC);
   $priceTotal = 0;
+ 
+  if (!empty($_POST['validate'])) {
+    $priceTotal = $_POST['priceTotal'];
+      createOrder($pdo, $iduser, $priceTotal);
+      $idbooking = $pdo->lastInsertId();
+
+    foreach ($cartBookings as $cartBooking) {
+      if (empty($cartBooking['idoption'])) {
+        InsertBookingWithoutOptions($iduser, $cartBooking['idconcert_place_date'], $cartBooking['nb_tickets'], $cartBooking['priceTotal'], $idbooking);
+        
+        $sql =<<<SQL
+        UPDATE 
+          donkeyconcert.concert_place_date
+        SET capacity_available = capacity_available - :nbTickets
+        WHERE idconcert_place_date = :idconcert_place_date
+SQL;
+        $statement=$pdo->prepare($sql);   
+        $statement->bindValue(':nbTickets', $cartBooking['nb_tickets'], PDO::PARAM_INT);
+        $statement->bindValue('idconcert_place_date', $cartBooking['idconcert_place_date'], PDO::PARAM_INT);
+        $statement->execute();
+      } else {
+        insertBookingOptions($iduser, $cartBooking['idoption'], $cartBooking['idconcert_date'], $cartBooking['priceTotal'], $idbooking);
+      }
+      deleteRow('donkeyconcert.cart', 'idcart', $cartBooking['idcart']);
+    }
+    header('Location:validatebooking.php');
+    die;
+  }
 
 ?>
 
@@ -77,7 +105,9 @@ SQL;
     <p class="card-text"><?= $priceTotal ?> €</p>
   </div>
 </div>
-<div class="text-center">
-  <button type="button" class="btn btn-info mx-auto text-center">Valider</button>
-</div>
+<form method="post">
+  <div class="text-center">
+    <input type="hidden" name="priceTotal" value="<?= $priceTotal ?>"><input type="submit" class="btn btn-info mx-auto text-center" name="validate" value="Valider">
+  </div>
+</form>
 

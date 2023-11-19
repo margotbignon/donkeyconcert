@@ -244,4 +244,56 @@ SQL;
     $statement->execute();
 }
 
+
+function InsertBookingWithoutOptions($iduser, $idconcert_place_date, $nbTickets, $priceTotal, $idbooking) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    INSERT INTO 
+        donkeyconcert.booking_concert (iduser, idconcert_place_date, nb_tickets, idoption, idconcert_date, priceTotal, idbooking) 
+        VALUES 
+        (:iduser, 
+        :idconcert_place_date,
+        :nbTickets, NULL, NULL, :priceTotal, :idbooking);
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
+    $statement->bindValue(':idconcert_place_date', $idconcert_place_date, PDO::PARAM_INT);
+    $statement->bindValue(':nbTickets', $nbTickets, PDO::PARAM_STR);
+    $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
+    $statement->bindValue(':idbooking', $idbooking, PDO::PARAM_INT);
+    $statement->execute();
+}
+
+function createOrder($pdo, int $iduser, string $totalPrice) {
+    $sql =<<<SQL
+    INSERT INTO 
+        donkeyconcert.booking (iduser, createdDate, totalPrice)
+    VALUES
+        (:iduser, NOW(), :totalPrice); 
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT); 
+    $statement->bindValue(':totalPrice', $totalPrice);
+    $statement->execute();
+}
+
+function insertBookingOptions($iduser, $options, $idconcert_date, $priceTotal, $idbooking) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    INSERT INTO
+        donkeyconcert.booking_concert (iduser, idconcert_place_date, nb_tickets, idoption, idconcert_date, priceTotal, idbooking) 
+    VALUES 
+        (:iduser, NULL, NULL, :options, 
+        :idconcert_date, 
+        :priceTotal, :idbooking);
+SQL;
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
+    $statement->bindValue(':options', $options, PDO::PARAM_STR);
+    $statement->bindValue(':idconcert_date', $idconcert_date, PDO::PARAM_INT);
+    $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
+    $statement->bindValue(':idbooking', $idbooking, PDO::PARAM_INT);
+    $statement->execute();
+}
+
 ?>
