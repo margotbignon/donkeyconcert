@@ -91,7 +91,7 @@ SQL;
           <td><?=$cartBooking['nb_tickets']?></td>
         <?php ; }; ?>
         <td><?=$cartBooking['priceTotal']?> €</td>
-        <td><a href="editBooking.php?ref=cart&idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>&idevent=<?=$cartBooking['idconcert_place_date']?>&idconcert=<?=$cartBooking['idconcert']?>">Modifier</a><br/><a href="delete.php?idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>">Supprimer</td>
+        <td><a href="editcart.php?ref=cart&idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>&idevent=<?=$cartBooking['idconcert_place_date']?>&idconcert=<?=$cartBooking['idconcert']?>">Modifier</a><br/><a href="delete.php?idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>">Supprimer</td>
         
       </tr>
         <?php 

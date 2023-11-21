@@ -9,7 +9,6 @@
     $idconcert = $_GET['idconcert'];
     $concert = getOneConcertJoin('idconcert', $idconcert);
     $booking = getRowCart($iduser, $idCart);
-    var_dump($booking);
      if (!empty($_POST)) {
          $dateSelection = $_POST['dateSelection'];
          $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);
@@ -58,21 +57,25 @@
                 <input type="submit" value="Valider" class="btn btn-secondary mt-1">
             
         </div>
-        <?php if (!empty($categoriesPlacement)) : ?>
+        <?php if (!empty($categoriesPlacement)) { ?>
             <div class="p-2">
             <p class="text-center">Choisissez vos billets</p>
             <fieldset name="category_placement[]">
                 <?php foreach ($categoriesPlacement as $categoryPlacement) : ?>
                     <div class="mb-1">
-                        <?php if ($categoryPlacement['idplace'] == $booking['idplace']) { ?>
+                        <?php if ($categoryPlacement['idplace'] == $booking['idplace']) { 
+                            if ($categoryPlacement['capacity_available'] == 0) { ?>
+                            <p>Il n'y a plus de billets disponibles pour cette catégorie de placement. Veuillez choisir une autre date ou relancer une réservation sur une autre catégorie.</p>
+                            <?php ; } else { ?> 
                             <?= $categoryPlacement['namePlace'] ?> <input  class="bg-secondary text-center border rounded ms-n2" name="categoryPlacement[<?= $categoryPlacement['idplace'] ?>] " type="number" max="<?=$categoryPlacement['capacity_available']?>" value="<?= $booking['nb_tickets']?>">
                             <?= $categoryPlacement['price'] ?>€/place
-                        <?php ; } ?>
+                        <?php ; }  } ?>
                     </div>
                 <?php endforeach; ?>
             </fieldset>
             </div>
-        <?php endif; ?>
+        <?php ; }  ?>
+        
     </div>
     <div class="text-center mt-5">
         <input type="submit" class="btn btn-info mx-auto" <?php if ($_GET['ref'] == 'cart') { ?>value="Je mets à jour mon panier" name="updatecart" <?php ; } else { ?>value="Je mets à jour ma commande" name="updatebooking"<?php ; } ?> ></input>
