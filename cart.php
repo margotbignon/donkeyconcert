@@ -7,7 +7,7 @@
     $iduser = $_SESSION['iduser'];
     $sql =<<<SQL
     SELECT 
-      ca.*, cd.dateConcert, cd.hourConcert, c.name as concert, a.name as artist, p.namePlace, o.name as optionName
+      ca.*, cd.dateConcert, cd.hourConcert, c.name as concert, a.name as artist, p.namePlace, o.name as optionName, ca.idconcert_place_date, c.idconcert
     FROM
       donkeyconcert.cart ca 
     LEFT JOIN 
@@ -91,7 +91,7 @@ SQL;
           <td><?=$cartBooking['nb_tickets']?></td>
         <?php ; }; ?>
         <td><?=$cartBooking['priceTotal']?> €</td>
-        <td><a href="editBooking.php?idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>&idevent=<?=$cartBooking['idconcert_place_date']?>">Modifier</a><br/><a href="delete.php?idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>">Supprimer</td>
+        <td><a href="editBooking.php?ref=cart&idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>&idevent=<?=$cartBooking['idconcert_place_date']?>&idconcert=<?=$cartBooking['idconcert']?>">Modifier</a><br/><a href="delete.php?idcart=<?=$cartBooking['idcart']?>&ref=cart&iduser=<?=$iduser?>">Supprimer</td>
         
       </tr>
         <?php 

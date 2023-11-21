@@ -21,9 +21,9 @@
             </div>
         </div>
         <div class="p-2">
-        <form class="d-flex">
-            <input class="form-control me-sm-2" type="search" placeholder="concert, lieu, artiste...">
-            <button class="btn btn-secondary my-2 my-sm-0" type="submit">Rechercher</button>
+        <form class="d-flex" method='post' action='index.php'>
+            <input class="form-control me-sm-2" type="search" placeholder="concert ou artiste" name="search">
+            <input type="submit" class="btn btn-secondary my-2 my-sm-0" type="submit" value="Rechercher">
         </form>
         </div>
         <div class="p-2 d-flex mt-1">

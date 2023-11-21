@@ -62,6 +62,33 @@ SQL;
     return $array;
 }
 
+function search(string $search) 
+{
+    $pdo = connectDB();
+    $sql=<<<SQL
+    SELECT c.idconcert, 
+        c.img_concert, 
+        c.name as concert, 
+        a.name as artist, 
+        DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR , 
+        DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR 
+    FROM 
+        donkeyconcert.concert c 
+    LEFT JOIN 
+        donkeyconcert.artist a ON c.idartist = a.idartist 
+    LEFT JOIN 
+        donkeyconcert.concert_date cd ON c.idconcert = cd.idconcert 
+    GROUP BY 
+        c.idconcert
+    HAVING c.name LIKE :search OR a.name LIKE :search
+SQL; 
+    $statement=$pdo->prepare($sql);
+    $statement->bindValue(':search', '%'.$search.'%', PDO::PARAM_STR);
+    $statement->execute();
+    $array = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $array;
+}
+
 function categoryAndDateFilter(string $dateStart, string $dateEnd, string $categorySearch) {
     $pdo = connectDB();
     $sql=<<<SQL
@@ -326,13 +353,8 @@ SQL;
 function getRowCart(int $iduser, int $idcart) {
     $pdo = connectDB();
     $sql=<<<SQL
-    SELECT 
-        cpd.idconcert_place_date, c.name as concert, a.name as artist, cd.dateConcert, cd.hourConcert, p.namePlace, ca.priceTotal, ca.nb_tickets, c.img_concert, ca.idconcert_place_date,
-        DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR, 
-        DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR,
-        DATE_FORMAT(MIN(cd.dateConcert), '%Y-%m-%d') as dateMinFRInput, 
-        DATE_FORMAT(MAX(cd.dateConcert), '%Y-%m-%d') as dateMaxFRInput,
-        c.description, c.img_concert
+     SELECT 
+        cd.dateConcert, cd.hourConcert, p.idplace, p.namePlace, ca.priceTotal, ca.nb_tickets, ca.idconcert_place_date
     FROM 
         donkeyconcert.cart ca
     LEFT JOIN 
@@ -352,8 +374,33 @@ SQL;
     $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
     $statement->bindValue(':idcart', $idcart, PDO::PARAM_INT);
     $statement->execute();
-    $array=$statement->fetchAll(PDO::FETCH_ASSOC);
+    $array=$statement->fetch(PDO::FETCH_ASSOC);
     return $array;
+}
+
+function updateCart($dateSelection, $categoryPlacement, $idconcert, $nbTickets, $priceTotal, $idCart) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    UPDATE 
+        donkeyconcert.cart
+    SET
+        idconcert_place_date = (SELECT cpd.idconcert_place_date 
+            FROM donkeyconcert.concert_place_date cpd
+            LEFT JOIN donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
+            WHERE cd.dateConcert = STR_TO_DATE(:dateSelection, '%Y-%m-%d') AND cpd.idplace = :categoryPlacement AND cd.idconcert = :idconcert),
+            nb_tickets = :nbTickets,
+            priceTotal = :priceTotal
+            WHERE idcart = :idcart
+SQL;
+
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':dateSelection', $dateSelection, PDO::PARAM_STR);
+    $statement->bindValue(':categoryPlacement', $categoryPlacement, PDO::PARAM_STR);
+    $statement->bindValue(':idconcert', $idconcert, PDO::PARAM_STR);
+    $statement->bindValue(':nbTickets', $nbTickets, PDO::PARAM_STR);
+    $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
+    $statement->bindValue(':idcart', $idCart, PDO::PARAM_INT);
+    $statement->execute();
 }
 
 ?>

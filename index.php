@@ -6,17 +6,25 @@
     $filterNotFund = false;
     if (!empty($_POST)) {
         $activateFilter = true;
-        $categorySearch = $_POST['category'];
-        $dateStart = $_POST['dateStart'];
-        $dateEnd = $_POST['dateEnd'];
+        if (!empty($_POST['search'])) {
+            $search = $_POST['search'];
+            $concerts = search($search);
+
+        }
         if (!empty($_POST['category']) && empty($_POST['dateStart']) && empty($_POST['dateEnd'])) {
+            $categorySearch = $_POST['category'];
             $concerts = categoryFilter($categorySearch);
         }
         if (!empty($_POST['dateStart']) && !empty($_POST['dateEnd']) && empty($_POST['category'])) {
+            $dateStart = $_POST['dateStart'];
+            $dateEnd = $_POST['dateEnd'];
             $concerts = dateFilter($dateStart, $dateEnd);
            
         }
         if (!empty($_POST['category']) && !empty($_POST['dateStart']) && !empty($_POST['dateEnd'])) {
+            $categorySearch = $_POST['category'];
+            $dateStart = $_POST['dateStart'];
+            $dateEnd = $_POST['dateEnd'];
             $concerts = categoryAndDateFilter($dateStart, $dateEnd, $categorySearch);
             
         }

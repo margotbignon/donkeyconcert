@@ -5,14 +5,16 @@
         die;
     }
     $iduser = $_SESSION['iduser'];
-    $idcart = $_GET['idcart'];
-    $booking = getRowCart($iduser, $idcart);
+    $idCart = $_GET['idcart'];
+    $idconcert = $_GET['idconcert'];
+    $concert = getOneConcertJoin('idconcert', $idconcert);
+    $booking = getRowCart($iduser, $idCart);
     var_dump($booking);
      if (!empty($_POST)) {
          $dateSelection = $_POST['dateSelection'];
          $categoriesPlacement = getCategoriesPlacementWhereConcert('idconcert', $idconcert, $dateSelection);
          $priceTotal=0;
-         if (!empty($_POST['addcart'])) {
+         if (!empty($_POST['updatecart'])) {
              $categoriesAdd = $_POST['categoryPlacement'];
              foreach ($categoriesAdd as $id => $category){
                  if ($category > 0) {
@@ -22,31 +24,28 @@
                              }
                          } 
                      
-                     InsertCartWithoutOptions($iduser, $dateSelection, $id, $idconcert, $category, $priceTotal);
-                     header('Location:cart.php');
+                    updateCart($dateSelection, $id, $idconcert, $category, $priceTotal, $idCart);
+                    header('Location:cart.php');
                     }
-                 }
-                 if (!empty($_POST['option-insurance']) && $_POST['option-insurance'] == 'on') {
-                    insertOptions($iduser, 1, $dateSelection, $idconcert, 25);
                 }
              }    
          }
     
 ?>
-<h2 class="text-center mt-5">Modifiez votre réservation pour votre concert avec <?= $booking[0]['artist']?> en concert !</h2>
+<h2 class="text-center mt-5">Modifiez votre réservation pour votre concert avec <?= $concert[0]['artist']?> !</h2>
 <div class="mt-5 ms-5 container">
     <div class="row">
         <div class="col-md-3">
-            <img src="img/<?= $booking[0]['img_concert'] ?>">
+            <img src="img/<?= $concert[0]['img_concert'] ?>">
         </div>
         <div class="col-md-3 ms-n5 mt-2">
-            <p><?= $booking[0]['artist'] ?></p>
-            <p><?= $booking[0]['concert'] ?></p>
+            <p><?= $concert[0]['artist'] ?></p>
+            <p><?= $concert[0]['concert'] ?></p>
             <p>Rock</p>
-            <p>Du <?= $booking[0]['dateMinFR'] ?> au <?= $booking[0]['dateMaxFR'] ?></p>
+            <p>Du <?= $concert[0]['dateMinFR'] ?> au <?= $concert[0]['dateMaxFR'] ?></p>
         </div>
         <div class="col-md-6 w-25 card text-white bg-primary mb-3 pt-4 text-center">
-            <p><?= $booking[0]['description'] ?></p>
+            <p><?= $concert[0]['description'] ?></p>
         </div>
     </div>
 </div>
@@ -55,7 +54,7 @@
         <div class="p-2 d-flex flex-column">
             <p class="text-center">Sélectionnez la date </p>
         
-                <input class="btn btn-outline-secondary" value="<?php if(!empty($_POST)) { echo $_POST['dateSelection']; }; ?>" type="date" name="dateSelection" min="<?= $booking[0]['dateMinFRInput'] ?>" max="<?= $booking[0]['dateMaxFRInput'] ?>">
+                <input class="btn btn-outline-secondary" type="date" name="dateSelection" min="<?= $concert[0]['dateMinFRInput'] ?>" max="<?= $concert[0]['dateMaxFRInput'] ?>" value="<?php if (!empty($_POST['dateSelection'])) { echo $_POST['dateSelection']; } else { ?><?= $booking['dateConcert']?><?php } ?>">
                 <input type="submit" value="Valider" class="btn btn-secondary mt-1">
             
         </div>
@@ -65,8 +64,10 @@
             <fieldset name="category_placement[]">
                 <?php foreach ($categoriesPlacement as $categoryPlacement) : ?>
                     <div class="mb-1">
-                        <?= $categoryPlacement['namePlace'] ?> <input  class="bg-secondary text-center border rounded ms-n2" name="categoryPlacement[<?= $categoryPlacement['idplace'] ?>] " type="number" max="<?=$categoryPlacement['capacity_available']?>" value="0">
-                        <?= $categoryPlacement['price'] ?>€/place
+                        <?php if ($categoryPlacement['idplace'] == $booking['idplace']) { ?>
+                            <?= $categoryPlacement['namePlace'] ?> <input  class="bg-secondary text-center border rounded ms-n2" name="categoryPlacement[<?= $categoryPlacement['idplace'] ?>] " type="number" max="<?=$categoryPlacement['capacity_available']?>" value="<?= $booking['nb_tickets']?>">
+                            <?= $categoryPlacement['price'] ?>€/place
+                        <?php ; } ?>
                     </div>
                 <?php endforeach; ?>
             </fieldset>
@@ -74,6 +75,6 @@
         <?php endif; ?>
     </div>
     <div class="text-center mt-5">
-        <input type="submit" class="btn btn-info mx-auto" value="J'ajoute au panier" name="addcart"></input>
+        <input type="submit" class="btn btn-info mx-auto" <?php if ($_GET['ref'] == 'cart') { ?>value="Je mets à jour mon panier" name="updatecart" <?php ; } else { ?>value="Je mets à jour ma commande" name="updatebooking"<?php ; } ?> ></input>
     </div>
 </form>
