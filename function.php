@@ -152,12 +152,12 @@ SQL;
     return $array;
 }
 
-function getOneConcert(string $table, string $id, int $idGet) {
+function getRow(string $table, string $id, int $idGet) {
     $pdo = connectDB();
     $statement=$pdo->prepare("SELECT $table.* FROM $table WHERE $id=:getId");
     $statement->bindValue(':getId', $idGet, PDO::PARAM_INT);
     $statement->execute();
-    $array=$statement->fetchAll(PDO::FETCH_ASSOC);
+    $array=$statement->fetch(PDO::FETCH_ASSOC);
     return $array;
 }
 
@@ -327,7 +327,7 @@ function getRowForDate ($parameter, int $iduser) {
     $pdo = connectDB();
     $sql=<<<SQL
     SELECT 
-        cpd.idconcert_place_date, c.name as concert, a.name as artist, cd.dateConcert, cd.hourConcert, p.namePlace, bc.priceTotal, bc.nb_tickets, c.img_concert, bc.idbooking_concert 
+        cpd.idconcert_place_date, c.name as concert, a.name as artist, cd.dateConcert, cd.hourConcert, p.namePlace, bc.priceTotal, bc.nb_tickets, c.img_concert, bc.idbooking_concert, c.idconcert, bc.idbooking_concert, bc.iduser
     FROM 
         donkeyconcert.booking_concert bc
     LEFT JOIN 
@@ -378,15 +378,15 @@ SQL;
     return $array;
 }
 
-function getRowOrder(int $iduser, int $idcart) {
+function getRowOrder(int $iduser, int $idbookingConcert) {
     $pdo = connectDB();
     $sql=<<<SQL
      SELECT 
-        cd.dateConcert, cd.hourConcert, p.idplace, p.namePlace, bc.priceTotal, bc.nb_tickets, bc.idconcert_place_date
+        cd.dateConcert, cd.hourConcert, p.idplace, p.namePlace, bc.priceTotal, bc.nb_tickets, bc.idconcert_place_date, bc.idbooking_concert
     FROM 
         donkeyconcert.booking_concert bc
     LEFT JOIN 
-        donkeyconcert.concert_place_date cpd ON ca.idconcert_place_date = cpd.idconcert_place_date
+        donkeyconcert.concert_place_date cpd ON bc.idconcert_place_date = cpd.idconcert_place_date
     LEFT JOIN 
         donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
     LEFT JOIN 
@@ -396,11 +396,11 @@ function getRowOrder(int $iduser, int $idcart) {
     LEFT JOIN 
         donkeyconcert.artist a ON c.idartist = a.idartist
     WHERE 
-        iduser = :iduser AND ca.idcart = :idcart
+        iduser = :iduser AND bc.idbooking_concert = :idbooking
 SQL;
     $statement=$pdo->prepare($sql);
     $statement->bindValue(':iduser', $iduser, PDO::PARAM_INT);
-    $statement->bindValue(':idcart', $idcart, PDO::PARAM_INT);
+    $statement->bindValue(':idbooking', $idbookingConcert, PDO::PARAM_INT);
     $statement->execute();
     $array=$statement->fetch(PDO::FETCH_ASSOC);
     return $array;
@@ -428,6 +428,50 @@ SQL;
     $statement->bindValue(':nbTickets', $nbTickets, PDO::PARAM_STR);
     $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
     $statement->bindValue(':idcart', $idCart, PDO::PARAM_INT);
+    $statement->execute();
+}
+
+
+function updateBooking($dateSelection, $categoryPlacement, $idconcert, $nbTickets, $priceTotal, $idBooking) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    UPDATE 
+        donkeyconcert.booking_concert
+    SET
+        idconcert_place_date = (SELECT cpd.idconcert_place_date 
+            FROM donkeyconcert.concert_place_date cpd
+            LEFT JOIN donkeyconcert.concert_date cd ON cpd.idconcert_date = cd.idconcert_date
+            WHERE cd.dateConcert = STR_TO_DATE(:dateSelection, '%Y-%m-%d') AND cpd.idplace = :categoryPlacement AND cd.idconcert = :idconcert),
+            nb_tickets = :nbTickets,
+            priceTotal = :priceTotal
+            WHERE idbooking_concert = :idbooking
+SQL;
+
+    $statement = $pdo->prepare($sql);
+    $statement->bindValue(':dateSelection', $dateSelection, PDO::PARAM_STR);
+    $statement->bindValue(':categoryPlacement', $categoryPlacement, PDO::PARAM_STR);
+    $statement->bindValue(':idconcert', $idconcert, PDO::PARAM_STR);
+    $statement->bindValue(':nbTickets', $nbTickets, PDO::PARAM_STR);
+    $statement->bindValue(':priceTotal', $priceTotal, PDO::PARAM_STR);
+    $statement->bindValue(':idbooking', $idBooking, PDO::PARAM_INT);
+    $statement->execute();
+}
+
+function updateProfil($email, $firstname, $lastname, $iduser) {
+    $pdo = connectDB();
+    $sql=<<<SQL
+    UPDATE donkeyconcert.user
+    SET 
+        email = :email,
+        firstname = :firstname,
+        lastname = :lastname
+    WHERE iduser = :id
+SQL;
+    $statement = $pdo->prepare($sql); 
+    $statement->bindValue(':email', $email, PDO::PARAM_STR);
+    $statement->bindValue(':firstname', $firstname, PDO::PARAM_STR);
+    $statement->bindValue(':lastname', $lastname, PDO::PARAM_STR);
+    $statement->bindValue(':id', $iduser, PDO::PARAM_INT);
     $statement->execute();
 }
 
