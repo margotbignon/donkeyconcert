@@ -4,6 +4,9 @@
     $categories = getTable('donkeyconcert.category');
     $cities = getTable('donkeyconcert.city');
     $filterNotFund = false;
+    $page = $_GET['page'] ?? 1;
+    $nbResultsPerPage = 2;
+    $offset = ($page -1) * $nbResultsPerPage;
     if (!empty($_POST)) {
         $activateFilter = true;
         if (!empty($_POST['search'])) {
@@ -32,9 +35,14 @@
             $filterNotFund = true;
         }
     } else {
-        $query="SELECT c.idconcert, c.img_concert, c.name as concert, a.name as artist, DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR , DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR FROM donkeyconcert.concert c LEFT JOIN donkeyconcert.artist a ON c.idartist = a.idartist LEFT JOIN donkeyconcert.concert_date cd ON c.idconcert = cd.idconcert GROUP BY c.idconcert";
+        $query = "SELECT COUNT(c.idconcert) as total FROM donkeyconcert.concert c";
+        $statement = $pdo->query($query);
+        $count = $statement->fetchColumn(0);
+        $nbPages = ceil($count / $nbResultsPerPage);
+        $query="SELECT c.idconcert, c.img_concert, c.name as concert, a.name as artist, DATE_FORMAT(MIN(cd.dateConcert), '%d/%m/%Y') as dateMinFR , DATE_FORMAT(MAX(cd.dateConcert), '%d/%m/%Y') as dateMaxFR FROM donkeyconcert.concert c LEFT JOIN donkeyconcert.artist a ON c.idartist = a.idartist LEFT JOIN donkeyconcert.concert_date cd ON c.idconcert = cd.idconcert GROUP BY c.idconcert LIMIT $offset, $nbResultsPerPage";
         $statement = $pdo->query($query);
         $concerts = $statement->fetchAll(PDO::FETCH_ASSOC);
+
     }
 
 ?>
@@ -86,4 +94,15 @@ endif;?>
                 <hr class="border border-danger border-2 opacity-50 w-75 mx-auto mt-5">
             <?php endforeach; 
         ?>
+<?php if (!empty($nbPages)) : ?>
+<nav class="btn-toolbar container d-flex justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
+  <ul class="btn-group me-2" role="group" aria-label="First group">
+    <?php for ($i = 1; $i <= $nbPages; $i++) : ?>
+    <li type="button" class="btn btn-secondary"><a class="text-white text-decoration-none" href="index.php?page=<?= $i; ?>"><?= $i; ?></a></li>
+
+    <?php endfor ?>
+    </ul>
+
+    </nav>
+<?php endif ?>
 <?php include "template/footer.php" ?>

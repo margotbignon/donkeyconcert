@@ -81,6 +81,7 @@ function search(string $search)
     GROUP BY 
         c.idconcert
     HAVING c.name LIKE :search OR a.name LIKE :search
+    
 SQL; 
     $statement=$pdo->prepare($sql);
     $statement->bindValue(':search', '%'.$search.'%', PDO::PARAM_STR);
@@ -88,6 +89,7 @@ SQL;
     $array = $statement->fetchAll(PDO::FETCH_ASSOC);
     return $array;
 }
+
 
 function categoryAndDateFilter(string $dateStart, string $dateEnd, string $categorySearch) {
     $pdo = connectDB();
